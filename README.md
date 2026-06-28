@@ -10,10 +10,10 @@ An intelligent, end-to-end automated ML platform that handles the full pipeline 
 ## 📸 Screenshots
 
 ### Home — Core Capabilities
-(<img width="1918" height="908" alt="Image" src="https://github.com/user-attachments/assets/c862fd47-c125-4547-a07b-9d21bc805470" />)
+<img width="1918" height="908" alt="Image" src="https://github.com/user-attachments/assets/c862fd47-c125-4547-a07b-9d21bc805470" />
 
 ### Run Experiment — Data Upload & Preview
-![Data Upload](https://github.com/akashdai/ml-orchestrator/blob/main/screenshots/data_upload.png?raw=true)
+<img width="1917" height="915" alt="Image" src="https://github.com/user-attachments/assets/89daa97a-e9db-4aea-9e94-c4418dd6220e" />
 
 ### Supervised Learning Results
 ![Supervised Results](https://github.com/akashdai/ml-orchestrator/blob/main/screenshots/supervised_results.png?raw=true)
