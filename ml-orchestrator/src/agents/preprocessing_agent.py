@@ -51,7 +51,8 @@ class PreprocessingAgent:
 
         if num_cols:
             imputer = SimpleImputer(strategy='median')
-            df[num_cols] = imputer.fit_transform(df[num_cols])
+            imputed = imputer.fit_transform(df[num_cols])
+            df[num_cols] = pd.DataFrame(imputed, columns=num_cols, index=df.index)
 
         cat_cols = df.select_dtypes(include=['object']).columns.tolist()
         if target_col and target_col in cat_cols:
@@ -59,7 +60,8 @@ class PreprocessingAgent:
 
         if cat_cols:
             imputer = SimpleImputer(strategy='most_frequent')
-            df[cat_cols] = imputer.fit_transform(df[cat_cols])
+            imputed = imputer.fit_transform(df[cat_cols])
+            df[cat_cols] = pd.DataFrame(imputed, columns=cat_cols, index=df.index)
 
         if target_col and df[target_col].isnull().sum() > 0:
             df = df.dropna(subset=[target_col])
