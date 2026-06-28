@@ -16,7 +16,7 @@ An intelligent, end-to-end automated ML platform that handles the full pipeline 
 <img width="1917" height="915" alt="Image" src="https://github.com/user-attachments/assets/89daa97a-e9db-4aea-9e94-c4418dd6220e" />
 
 ### Supervised Learning Results
-![Supervised Results](https://github.com/akashdai/ml-orchestrator/blob/main/screenshots/supervised_results.png?raw=true)
+<img width="1917" height="911" alt="Image" src="https://github.com/user-attachments/assets/f6c24967-f6f5-4760-b735-33919976bb44" />
 
 ### Unsupervised Clustering Results
 ![Unsupervised Results](https://github.com/akashdai/ml-orchestrator/blob/main/screenshots/unsupervised_results.png?raw=true)
