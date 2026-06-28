@@ -842,28 +842,27 @@ elif page == "📊 Run Experiment":
                     with st.spinner("🔄 Running ML Pipeline..."):
                         try:
                             temp_path = "temp_data.csv"
-                            df.to_csv(temp_path, index=False, encoding='utf-8')
-                            
+
+                            # Pre-clean: keep only numeric columns, drop all-NaN cols, fill remaining NaNs
+                            df_unsup = df.select_dtypes(include=[np.number]).copy()
+                            df_unsup = df_unsup.dropna(axis=1, how='all')
+                            df_unsup = df_unsup.fillna(df_unsup.median(numeric_only=True))
+                            df_unsup.to_csv(temp_path, index=False, encoding='utf-8')
+
                             progress = st.progress(0)
                             status = st.empty()
-                            
-                            status.text("📊 Data Inspection...")
-                            progress.progress(15)
-                            time.sleep(0.3)
-                            
-                            status.text("🔧 Preprocessing...")
-                            progress.progress(30)
-                            time.sleep(0.3)
-                            
-                            status.text("🎯 Feature Selection...")
+
+                            status.text("📊 Processing...")
+                            progress.progress(25)
+
+                            status.text("🎨 Dimensionality Reduction...")
                             progress.progress(50)
-                            time.sleep(0.3)
-                            
-                            status.text("🤖 Training Models...")
-                            progress.progress(70)
-                            
+
+                            status.text("🔍 Clustering...")
+                            progress.progress(75)
+
                             results = st.session_state.orchestrator.run(
-                                temp_path, target, 'supervised'
+                            temp_path, pipeline_type='unsupervised'
                             )
                             
                             status.text("⚡ Hyperparameter Tuning...")
