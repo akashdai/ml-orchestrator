@@ -31,3 +31,4 @@ catboost_info/
 temp_data.csv
 models/
 experiments/mlruns/
+experiments/visualizations/
