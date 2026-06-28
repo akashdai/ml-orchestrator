@@ -1,9 +1,33 @@
+# Python
 __pycache__/
 *.py[cod]
+*.pyo
+
+# Virtual environments
 .venv/
 venv/
+env/
+
+# Logs
 *.log
-experiments/mlruns/
-models/
-temp_data.csv
+
+# Databases
+*.db
+
+# MLflow
+mlruns/
+mlflow.db
+
+# CatBoost training artifacts
+catboost_info/
+
+# VS Code
+.vscode/
+
+# macOS
 .DS_Store
+
+# Temp / misc
+temp_data.csv
+models/
+experiments/mlruns/
