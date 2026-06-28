@@ -1,0 +1,34 @@
+project:
+  name: "ML Experiment Orchestrator"
+  version: "1.0.0"
+
+preprocessing:
+  missing_threshold: 0.5      # Drop cols with >50% missing
+  outlier_method: "iqr"       # or "zscore"
+  handle_imbalance: true      # Apply SMOTE for imbalanced data
+
+feature_selection:
+  enabled: true
+  max_features: 30
+
+supervised:
+  cv_folds: 5                 # Cross-validation folds
+  tuning:
+    n_trials: 50              # Hyperparameter tuning trials
+    timeout: 1800             # Max tuning time (seconds)
+
+unsupervised:
+  dimensionality_reduction:
+    - PCA
+    - TSNE
+    - UMAP
+  clustering:
+    - KMeans
+    - DBSCAN
+    - AgglomerativeClustering
+    - GaussianMixture
+  n_clusters_range: [2, 10]
+
+mlflow:
+  tracking_uri: "./experiments/mlruns"
+  experiment_name: "ML_Orchestrator"

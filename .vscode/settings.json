@@ -1,0 +1,6 @@
+{
+  "python.analysis.extraPaths": [
+    "${workspaceFolder}/ml-orchestrator/src",
+    "${workspaceFolder}/ml-orchestrator"
+  ]
+}
