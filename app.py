@@ -788,161 +788,197 @@ elif page == "📊 Run Experiment":
     uploaded_file = st.file_uploader("📁 Upload Your Dataset (CSV)", type=['csv'])
     
     if uploaded_file:
-        df = pd.read_csv(uploaded_file)
-        st.session_state.df = df
+        # Try multiple encodings to handle different CSV formats
+        encodings_to_try = ['utf-8', 'latin-1', 'cp1252', 'iso-8859-1', 'utf-16']
+        df = None
+        successful_encoding = None
         
-        st.success(f"✅ Dataset Loaded: {df.shape[0]} rows × {df.shape[1]} columns")
+        for encoding in encodings_to_try:
+            try:
+                uploaded_file.seek(0)  # Reset file pointer to beginning
+                df = pd.read_csv(uploaded_file, encoding=encoding)
+                successful_encoding = encoding
+                break
+            except (UnicodeDecodeError, UnicodeError):
+                continue
+            except Exception as e:
+                st.error(f"❌ Error reading file with {encoding}: {str(e)}")
+                break
         
-        with st.expander("👁️ Preview Data & Statistics"):
-            col1, col2 = st.columns([2, 1])
+        if df is None:
+            st.error("❌ Could not read the CSV file. Please check the file format and encoding.")
+        else:
+            st.session_state.df = df
             
-            with col1:
-                st.dataframe(df.head(10))
+            if successful_encoding != 'utf-8':
+                st.info(f"ℹ️ File loaded with {successful_encoding} encoding")
             
-            with col2:
-                st.metric("Total Rows", df.shape[0])
-                st.metric("Total Columns", df.shape[1])
-                st.metric("Missing Values", df.isnull().sum().sum())
-                st.metric("Duplicates", df.duplicated().sum())
-        
-        st.markdown("---")
-        
-        learning_type = st.radio(
-            "🎯 Select Learning Type:",
-            ["Supervised Learning", "Unsupervised Learning"],
-            horizontal=True
-        )
-        
-        if learning_type == "Supervised Learning":
-            target = st.selectbox("🎯 Select Target Column:", df.columns)
+            st.success(f"✅ Dataset Loaded: {df.shape[0]} rows × {df.shape[1]} columns")
             
-            if st.button("🚀 Run Supervised Experiment", type="primary", use_container_width=True):
-                with st.spinner("🔄 Running ML Pipeline..."):
-                    try:
-                        temp_path = "temp_data.csv"
-                        df.to_csv(temp_path, index=False)
-                        
-                        progress = st.progress(0)
-                        status = st.empty()
-                        
-                        status.text("📊 Data Inspection...")
-                        progress.progress(15)
-                        time.sleep(0.3)
-                        
-                        status.text("🔧 Preprocessing...")
-                        progress.progress(30)
-                        time.sleep(0.3)
-                        
-                        status.text("🎯 Feature Selection...")
-                        progress.progress(50)
-                        time.sleep(0.3)
-                        
-                        status.text("🤖 Training Models...")
-                        progress.progress(70)
-                        
-                        results = st.session_state.orchestrator.run(
-                            temp_path, target, 'supervised'
-                        )
-                        
-                        status.text("⚡ Hyperparameter Tuning...")
-                        progress.progress(90)
-                        
-                        st.session_state.results = results
-                        
-                        progress.progress(100)
-                        status.empty()
-                        progress.empty()
-                        
-                        st.balloons()
-                        st.success("🎉 Experiment Completed Successfully!")
-                        
-                        col1, col2, col3 = st.columns(3)
-                        with col1:
-                            st.markdown(f"""
-                                <div style='background: #1e5128; border-radius: 1rem; padding: 1rem;'>
-                                    <div style='font-size: 1rem; color: #d4d4d4; margin-bottom: 0.5rem;'>🏆 Best Model</div>
-                                    <div style='font-size: 1.75rem; font-weight: 700; color: white;'>{results['best_model']}</div>
+            with st.expander("👁️ Preview Data & Statistics"):
+                col1, col2 = st.columns([2, 1])
+                
+                with col1:
+                    st.dataframe(df.head(10))
+                
+                with col2:
+                    st.metric("Total Rows", df.shape[0])
+                    st.metric("Total Columns", df.shape[1])
+                    st.metric("Missing Values", df.isnull().sum().sum())
+                    st.metric("Duplicates", df.duplicated().sum())
+            
+            st.markdown("---")
+            
+            learning_type = st.radio(
+                "🎯 Select Learning Type:",
+                ["Supervised Learning", "Unsupervised Learning"],
+                horizontal=True
+            )
+            
+            if learning_type == "Supervised Learning":
+                target = st.selectbox("🎯 Select Target Column:", df.columns)
+                
+                if st.button("🚀 Run Supervised Experiment", type="primary", use_container_width=True):
+                    with st.spinner("🔄 Running ML Pipeline..."):
+                        try:
+                            temp_path = "temp_data.csv"
+                            df.to_csv(temp_path, index=False, encoding='utf-8')
+                            
+                            progress = st.progress(0)
+                            status = st.empty()
+                            
+                            status.text("📊 Data Inspection...")
+                            progress.progress(15)
+                            time.sleep(0.3)
+                            
+                            status.text("🔧 Preprocessing...")
+                            progress.progress(30)
+                            time.sleep(0.3)
+                            
+                            status.text("🎯 Feature Selection...")
+                            progress.progress(50)
+                            time.sleep(0.3)
+                            
+                            status.text("🤖 Training Models...")
+                            progress.progress(70)
+                            
+                            results = st.session_state.orchestrator.run(
+                                temp_path, target, 'supervised'
+                            )
+                            
+                            status.text("⚡ Hyperparameter Tuning...")
+                            progress.progress(90)
+                            
+                            st.session_state.results = results
+                            
+                            progress.progress(100)
+                            status.empty()
+                            progress.empty()
+                            
+                            st.balloons()
+                            st.success("🎉 Experiment Completed Successfully!")
+                            
+                            col1, col2, col3 = st.columns(3)
+                            with col1:
+                                st.markdown(f"""
+                                <div style="background: white; padding: 1.5rem; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                                    <p style="color: #666; font-size: 0.9rem; margin: 0;">🏆 Best Model</p>
+                                    <p style="color: #1e5128; font-size: 2rem; font-weight: 700; margin: 0.5rem 0 0 0;">{results['best_model']}</p>
                                 </div>
-                            """, unsafe_allow_html=True)
-                        with col2:
-                            st.metric("📋 Task Type", results['task_type'].upper())
-                        with col3:
-                            metric_key = list(results['metrics'].keys())[0]
-                            st.metric(metric_key.upper(), f"{results['metrics'][metric_key]:.4f}")
+                                """, unsafe_allow_html=True)
+                            with col2:
+                                st.markdown(f"""
+                                <div style="background: white; padding: 1.5rem; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                                    <p style="color: #666; font-size: 0.9rem; margin: 0;">📋 Task Type</p>
+                                    <p style="color: #1e5128; font-size: 2rem; font-weight: 700; margin: 0.5rem 0 0 0;">{results['task_type'].upper()}</p>
+                                </div>
+                                """, unsafe_allow_html=True)
+                            with col3:
+                                metric_key = list(results['metrics'].keys())[0]
+                                st.markdown(f"""
+                                <div style="background: white; padding: 1.5rem; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                                    <p style="color: #666; font-size: 0.9rem; margin: 0;">{metric_key.upper()}</p>
+                                    <p style="color: #1e5128; font-size: 2rem; font-weight: 700; margin: 0.5rem 0 0 0;">{results['metrics'][metric_key]:.4f}</p>
+                                </div>
+                                """, unsafe_allow_html=True)
+                            
+                            st.markdown("### 📊 Detailed Metrics")
+                            st.dataframe(pd.DataFrame([results['metrics']]), use_container_width=True)
+                            
+                            st.markdown("### 📈 Visualizations")
+                            viz_path = Path("experiments/visualizations")
+                            if viz_path.exists():
+                                cols = st.columns(2)
+                                for idx, viz_file in enumerate(viz_path.glob("*.png")):
+                                    with cols[idx % 2]:
+                                        img = Image.open(viz_file)
+                                        st.image(img, caption=viz_file.stem.replace('_', ' ').title())
+                            
+                            st.markdown("### 💾 Download Trained Model")
+                            if Path(results['model_path']).exists():
+                                with open(results['model_path'], 'rb') as f:
+                                    st.download_button(
+                                        "📥 Download Model (.pkl)",
+                                        f,
+                                        f"{results['best_model']}_trained.pkl",
+                                        use_container_width=True
+                                    )
                         
-                        st.markdown("### 📊 Detailed Metrics")
-                        st.dataframe(pd.DataFrame([results['metrics']]), use_container_width=True)
-                        
-                        st.markdown("### 📈 Visualizations")
-                        viz_path = Path("experiments/visualizations")
-                        if viz_path.exists():
-                            cols = st.columns(2)
-                            for idx, viz_file in enumerate(viz_path.glob("*.png")):
-                                with cols[idx % 2]:
+                        except Exception as e:
+                            st.error(f"❌ Error occurred: {str(e)}")
+                            import traceback
+                            st.code(traceback.format_exc())
+            
+            else:  # Unsupervised
+                if st.button("🚀 Run Unsupervised Experiment", type="primary", use_container_width=True):
+                    with st.spinner("🔄 Running Unsupervised Learning..."):
+                        try:
+                            temp_path = "temp_data.csv"
+                            df.to_csv(temp_path, index=False, encoding='utf-8')
+                            
+                            progress = st.progress(0)
+                            status = st.empty()
+                            
+                            status.text("📊 Processing...")
+                            progress.progress(25)
+                            
+                            status.text("🎨 Dimensionality Reduction...")
+                            progress.progress(50)
+                            
+                            status.text("🔍 Clustering...")
+                            progress.progress(75)
+                            
+                            results = st.session_state.orchestrator.run(
+                                temp_path, pipeline_type='unsupervised'
+                            )
+                            
+                            progress.progress(100)
+                            status.empty()
+                            progress.empty()
+                            
+                            st.session_state.results = results
+                            
+                            st.balloons()
+                            st.success("🎉 Unsupervised Learning Complete!")
+                            
+                            st.markdown("### 🎯 Clustering Results")
+                            clustering_df = pd.DataFrame([
+                                {'Algorithm': k, 'Clusters Found': v}
+                                for k, v in results['clustering'].items()
+                            ])
+                            st.dataframe(clustering_df, use_container_width=True)
+                            
+                            st.markdown("### 📈 Visualizations")
+                            viz_path = Path("experiments/visualizations")
+                            if viz_path.exists():
+                                for viz_file in viz_path.glob("*.png"):
                                     img = Image.open(viz_file)
-                                    st.image(img, caption=viz_file.stem.replace('_', ' ').title())
+                                    st.image(img, use_container_width=True)
                         
-                        st.markdown("### 💾 Download Trained Model")
-                        if Path(results['model_path']).exists():
-                            with open(results['model_path'], 'rb') as f:
-                                st.download_button(
-                                    "📥 Download Model (.pkl)",
-                                    f,
-                                    f"{results['best_model']}_trained.pkl",
-                                    use_container_width=True
-                                )
-                    
-                    except Exception as e:
-                        st.error(f"❌ Error occurred: {str(e)}")
-        
-        else:  # Unsupervised
-            if st.button("🚀 Run Unsupervised Experiment", type="primary", use_container_width=True):
-                with st.spinner("🔄 Running Unsupervised Learning..."):
-                    try:
-                        temp_path = "temp_data.csv"
-                        df.to_csv(temp_path, index=False)
-                        
-                        progress = st.progress(0)
-                        status = st.empty()
-                        
-                        status.text("📊 Processing...")
-                        progress.progress(25)
-                        
-                        status.text("🎨 Dimensionality Reduction...")
-                        progress.progress(50)
-                        
-                        status.text("🔍 Clustering...")
-                        progress.progress(75)
-                        
-                        results = st.session_state.orchestrator.run(
-                            temp_path, pipeline_type='unsupervised'
-                        )
-                        
-                        progress.progress(100)
-                        status.empty()
-                        progress.empty()
-                        
-                        st.session_state.results = results
-                        
-                        st.balloons()
-                        st.success("🎉 Unsupervised Learning Complete!")
-                        
-                        st.markdown("### 🎯 Clustering Results")
-                        clustering_df = pd.DataFrame([
-                            {'Algorithm': k, 'Clusters Found': v}
-                            for k, v in results['clustering'].items()
-                        ])
-                        st.dataframe(clustering_df, use_container_width=True)
-                        
-                        st.markdown("### 📈 Visualizations")
-                        viz_path = Path("experiments/visualizations")
-                        if viz_path.exists():
-                            for viz_file in viz_path.glob("*.png"):
-                                img = Image.open(viz_file)
-                                st.image(img, use_container_width=True)
-                    
-                    except Exception as e:
-                        st.error(f"❌ Error: {str(e)}")
+                        except Exception as e:
+                            st.error(f"❌ Error: {str(e)}")
+                            import traceback
+                            st.code(traceback.format_exc())
 
 # ==================== RESULTS PAGE ====================
 elif page == "📈 Results":
