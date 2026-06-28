@@ -41,7 +41,7 @@ class PreprocessingAgent:
         if task_type == 'classification':
             df_clean = self._handle_imbalance(df_clean, target_col)
 
-        self.logger.success(f"Preprocessing: {df.shape} → {df_clean.shape}")
+        self.logger.success(f"Preprocessing: {df.shape} -> {df_clean.shape}")
         return df_clean
 
     def _handle_missing(self, df, target_col):
@@ -50,18 +50,26 @@ class PreprocessingAgent:
             num_cols.remove(target_col)
 
         if num_cols:
-            imputer = SimpleImputer(strategy='median')
-            imputed = imputer.fit_transform(df[num_cols])
-            df[num_cols] = pd.DataFrame(imputed, columns=num_cols, index=df.index)
+            # Drop columns that are entirely NaN before imputing
+            num_cols = [c for c in num_cols if df[c].notna().any()]
+            if num_cols:
+                imputer = SimpleImputer(strategy='median')
+                imputed = imputer.fit_transform(df[num_cols])
+                for i, col in enumerate(num_cols):
+                    df[col] = imputed[:, i]
 
         cat_cols = df.select_dtypes(include=['object']).columns.tolist()
         if target_col and target_col in cat_cols:
             cat_cols.remove(target_col)
 
         if cat_cols:
-            imputer = SimpleImputer(strategy='most_frequent')
-            imputed = imputer.fit_transform(df[cat_cols])
-            df[cat_cols] = pd.DataFrame(imputed, columns=cat_cols, index=df.index)
+            # Drop columns that are entirely NaN before imputing
+            cat_cols = [c for c in cat_cols if df[c].notna().any()]
+            if cat_cols:
+                imputer = SimpleImputer(strategy='most_frequent')
+                imputed = imputer.fit_transform(df[cat_cols])
+                for i, col in enumerate(cat_cols):
+                    df[col] = imputed[:, i]
 
         if target_col and df[target_col].isnull().sum() > 0:
             df = df.dropna(subset=[target_col])
