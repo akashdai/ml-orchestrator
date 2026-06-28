@@ -982,13 +982,13 @@ elif page == "📊 Run Experiment":
 # ==================== RESULTS PAGE ====================
 elif page == "📈 Results":
     st.markdown('<h1 class="main-header">📈 Experiment Results</h1>', unsafe_allow_html=True)
-    
+
     if st.session_state.results is None:
         st.info("ℹ️ No results available. Please run an experiment first!")
     else:
         results = st.session_state.results
-        
-        if results['pipeline'] == 'supervised':
+
+        if results.get('pipeline') == 'supervised':
             col1, col2, col3 = st.columns(3)
             with col1:
                 st.markdown(f"""
@@ -1002,13 +1002,38 @@ elif page == "📈 Results":
             with col3:
                 metric_key = list(results['metrics'].keys())[0]
                 st.metric(metric_key.upper(), f"{results['metrics'][metric_key]:.4f}")
-            
+
+            st.markdown("### 📊 Detailed Metrics")
             st.dataframe(pd.DataFrame([results['metrics']]), use_container_width=True)
-            
+
             viz_path = Path("experiments/visualizations")
             if viz_path.exists():
+                st.markdown("### 📈 Visualizations")
                 for viz_file in viz_path.glob("*.png"):
-                    st.image(Image.open(viz_file))
+                    st.image(Image.open(viz_file), use_column_width=True)
+
+        elif results.get('pipeline') == 'unsupervised':
+            st.markdown("### 🎯 Clustering Results")
+            clustering_df = pd.DataFrame([
+                {'Algorithm': k, 'Clusters Found': v}
+                for k, v in results['clustering'].items()
+            ])
+            st.dataframe(clustering_df, use_container_width=True)
+
+            st.markdown("### 📊 Dimensionality Reduction")
+            dim_df = pd.DataFrame([
+                {'Method': k, 'Output Shape': str(v)}
+                for k, v in results['dimensionality_reduction'].items()
+            ])
+            st.dataframe(dim_df, use_container_width=True)
+
+            viz_path = Path("experiments/visualizations")
+            if viz_path.exists():
+                st.markdown("### 📈 Visualizations")
+                for viz_file in viz_path.glob("*.png"):
+                    st.image(Image.open(viz_file), use_column_width=True)
+        else:
+            st.warning("Unknown pipeline type in results.")
 
 # ==================== DOCUMENTATION PAGE ====================
 elif page == "📚 Documentation":
