@@ -972,7 +972,7 @@ elif page == "📊 Run Experiment":
                             if viz_path.exists():
                                 for viz_file in viz_path.glob("*.png"):
                                     img = Image.open(viz_file)
-                                    st.image(img, use_container_width=True)
+                                    st.image(img, use_column_width=True)
                         
                         except Exception as e:
                             st.error(f"❌ Error: {str(e)}")
