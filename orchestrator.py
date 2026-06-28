@@ -5,6 +5,7 @@ from pathlib import Path
 import joblib
 import numpy as np
 import pandas as pd
+from sklearn.impute import SimpleImputer
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder
 
@@ -78,7 +79,7 @@ class MLOrchestrator:
             Dictionary with results
         """
 
-        self.logger.section("🚀 ML EXPERIMENT ORCHESTRATOR")
+        self.logger.section("ML EXPERIMENT ORCHESTRATOR")
 
         data_agent = DataAgent(self.config)
         df, data_report = data_agent.load_and_inspect(file_path)
@@ -192,7 +193,7 @@ class MLOrchestrator:
         joblib.dump(pipeline_info, 'models/supervised/pipeline.pkl')
         self.logger.success("Pipeline saved: models/supervised/pipeline.pkl")
 
-        self.logger.section("✅ SUPERVISED PIPELINE COMPLETE!")
+        self.logger.section("SUPERVISED PIPELINE COMPLETE!")
 
         return {
             'pipeline': 'supervised',
@@ -208,11 +209,28 @@ class MLOrchestrator:
 
         self.logger.section("UNSUPERVISED LEARNING PIPELINE")
 
-        preprocessor = PreprocessingAgent(self.config)
-        df_clean = preprocessor.preprocess(df)
+        # Step 1: Keep only numeric columns, drop empty rows/cols, fill NaNs
+        df_num = df.select_dtypes(include=[np.number]).copy()
+        df_num = df_num.dropna(axis=1, how='all')
+        df_num = df_num.dropna(axis=0, how='all')
+        df_num = df_num.fillna(df_num.median())
 
-        X = df_clean.select_dtypes(include=[np.number]).values
-        self.logger.info(f"Working with {X.shape[1]} numeric features")
+        # Step 2: Run preprocessor (scaling etc.)
+        preprocessor = PreprocessingAgent(self.config)
+        df_clean = preprocessor.preprocess(df_num)
+
+        # Step 3: Extract numpy array
+        X = df_clean.select_dtypes(include=[np.number]).values.astype(np.float64)
+
+        # Step 4: Absolute final NaN guard — no sklearn call will ever see a NaN
+        if np.isnan(X).any():
+            X = SimpleImputer(strategy='median').fit_transform(X)
+
+        # Step 5: Drop any columns that are still all-NaN (edge case)
+        col_mask = ~np.all(np.isnan(X), axis=0)
+        X = X[:, col_mask]
+
+        self.logger.info(f"Working with {X.shape[1]} numeric features, {X.shape[0]} samples")
 
         dim_reducer = DimensionalityReductionAgent(self.config)
         reduction_results = dim_reducer.reduce(X)
@@ -237,7 +255,7 @@ class MLOrchestrator:
         joblib.dump(results, results_path)
         self.logger.success(f"Results saved: {results_path}")
 
-        self.logger.section("✅ UNSUPERVISED PIPELINE COMPLETE!")
+        self.logger.section("UNSUPERVISED PIPELINE COMPLETE!")
 
         return {
             'pipeline': 'unsupervised',
@@ -262,9 +280,9 @@ class MLOrchestrator:
                     target_col = df.columns[choice - 1]
                     self.logger.success(f"Selected: {target_col}")
                     return target_col
-                print("❌ Invalid number!")
+                print("Invalid number!")
             except ValueError:
-                print("❌ Please enter a number!")
+                print("Please enter a number!")
 
 
 if __name__ == '__main__':
