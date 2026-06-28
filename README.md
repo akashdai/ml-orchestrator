@@ -1,3 +1,15 @@
+---
+title: ML Experiment Orchestrator
+emoji: 🤖
+colorFrom: green
+colorTo: gray
+sdk: streamlit
+sdk_version: 1.30.0
+app_file: app.py
+pinned: false
+license: mit
+---
+
 # ml-orchestrator
 # 🤖 ML Experiment Orchestrator
 
@@ -86,7 +98,7 @@ ml-orchestrator/
 │   │   ├── task_detector.py
 │   │   ├── trainer.py
 │   │   ├── tuner.py
-│   │   └── evaluator.py
+n│   │   └── evaluator.py
 │   ├── unsupervised/           # Unsupervised pipeline
 │   │   ├── clustering.py
 │   │   └── dimensionality_reduction.py
@@ -115,7 +127,7 @@ ml-orchestrator/
 
 ```bash
 git clone https://github.com/akashdai/ml-orchestrator.git
-cd ml-orchestrator
+dcd ml-orchestrator
 ```
 
 ### 2. Create a virtual environment
@@ -264,3 +276,4 @@ PCA · t-SNE · UMAP
 ## 📄 License
 
 This project is open source and available under the [MIT License](LICENSE).
+

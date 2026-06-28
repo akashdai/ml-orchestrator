@@ -3,31 +3,30 @@ project:
   version: "1.0.0"
 
 preprocessing:
-  missing_threshold: 0.5      # Drop cols with >50% missing
-  outlier_method: "iqr"       # or "zscore"
-  handle_imbalance: true      # Apply SMOTE for imbalanced data
+  missing_threshold: 0.5
+  outlier_method: "iqr"
+  handle_imbalance: true
 
 feature_selection:
   enabled: true
-  max_features: 30
+  max_features: 20
 
 supervised:
-  cv_folds: 5                 # Cross-validation folds
+  cv_folds: 3
   tuning:
-    n_trials: 50              # Hyperparameter tuning trials
-    timeout: 1800             # Max tuning time (seconds)
+    n_trials: 15
+    timeout: 120
 
 unsupervised:
   dimensionality_reduction:
     - PCA
     - TSNE
-    - UMAP
   clustering:
     - KMeans
     - DBSCAN
     - AgglomerativeClustering
     - GaussianMixture
-  n_clusters_range: [2, 10]
+  n_clusters_range: [2, 8]
 
 mlflow:
   tracking_uri: "./experiments/mlruns"
