@@ -434,6 +434,7 @@ elif page == "📊 Run Experiment":
     uploaded_file = st.file_uploader("📁 Upload Your Dataset (CSV)", type=['csv'])
 
     if uploaded_file:
+        uploaded_file.name = uploaded_file.name.replace(' ', '_')
         encodings = ['utf-8', 'latin-1', 'cp1252', 'iso-8859-1']
         df = None
         for enc in encodings:
