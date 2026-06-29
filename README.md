@@ -1,7 +1,5 @@
 ---
 title: ML Experiment Orchestrator
-[![Live Demo](https://img.shields.io/badge/🤗%20Live%20Demo-Hugging%20Face-green)](https://huggingface.co/spaces/akashdai/ml-orchestrator)
-[![GitHub](https://img.shields.io/badge/GitHub-akashdai-black?logo=github)](https://github.com/akashdai/ml-orchestrator)
 emoji: 🤖
 colorFrom: green
 colorTo: gray
